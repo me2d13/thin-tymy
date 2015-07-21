@@ -12,7 +12,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class MainController {
     @RequestMapping(value = "/main", method = RequestMethod.GET)
     public String main(ModelMap model) {
-        return "main";
+        model.addAttribute("includePage", "/WEB-INF/jsp/main.jsp");
+        return "skeleton";
     }
+
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String empty(ModelMap model) {
+        return "forward:/main";
+    }
+
 
 }
