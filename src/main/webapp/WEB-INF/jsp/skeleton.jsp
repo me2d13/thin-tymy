@@ -14,13 +14,14 @@
     <link rel='stylesheet' href='<c:url value="/webjars/bootstrap/3.3.5/css/bootstrap.min.css" />'>
     <link href="<c:url value="/static/css/main.css" />" rel="stylesheet">
     <script src="<c:url value="/webjars/jquery/2.1.4/jquery.min.js" />"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('p').animate({
-                fontSize: '48px'
-            }, "slow");
-        });
-    </script>
+    
+    <c:if test="${! empty jsFiles}">
+        <c:forEach var="jsFile" items="${jsFiles}">
+            <script src="<c:url value="/static/js/${jsFile}" />"></script>
+        </c:forEach>
+    </c:if>
+    
+    <link href="<c:url value="/static/css/main.css" />" rel="stylesheet">
 </head>
 <body class="container">
 <header class="row">

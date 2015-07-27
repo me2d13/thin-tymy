@@ -21,9 +21,10 @@ public class MainController extends AbstractController {
     @RequestMapping(value = "/main", method = RequestMethod.GET)
     public String main(ModelMap model, HttpSession session, HttpServletRequest request) {
         if (!checkLogin(request, session, model)) {
-            return String.format("redirect:http://%s.tymy.cz", getTeamSysName());
+            return String.format("redirect:%s", getURL(request, false));
         }
         addCommonVars(model);
+        addJavascript(model, "main.js");
         RestResponse<List<Discussion>> discussions = restTemplate.getForObject(apiUrl("discussions/accessible", request, session), RestResponse.class);
         model.addAttribute("discussions", discussions);
         model.addAttribute("includePage", "/WEB-INF/jsp/main.jsp");

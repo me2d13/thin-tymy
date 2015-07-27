@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ public class AbstractController {
     private static final String ATTR_TEAM_SYS_NAME = "teamSysName";
     private static final String ATTR_SESSION_KEY = "TSID";
     private static final String PHP_SESSION_ID = "PHPSESSID";
+    private static final String ATTR_JS_FILES = "jsFiles";
 
     private static Logger LOG = Logger.getLogger(AbstractController.class);
 
@@ -86,6 +88,12 @@ public class AbstractController {
         }
     }
 
+    protected void addJavascript(ModelMap model, String file) {
+        List<String> jsFiles = (List<String>) model.getOrDefault(ATTR_JS_FILES, new ArrayList<String>());
+        jsFiles.add(file);
+        model.addAttribute(ATTR_JS_FILES, jsFiles);
+    }
+
     protected String apiUrl(String apiPage, HttpServletRequest request) {
         return apiUrl(apiPage, request, null);
     }
@@ -117,5 +125,35 @@ public class AbstractController {
         return result;
     }
 
+    public static String getURL(HttpServletRequest req, boolean withPath) {
+
+        String scheme = req.getScheme();             // http
+        String serverName = req.getServerName();     // hostname.com
+        int serverPort = req.getServerPort();        // 80
+        String contextPath = req.getContextPath();   // /mywebapp
+        String servletPath = req.getServletPath();   // /servlet/MyServlet
+        String pathInfo = req.getPathInfo();         // /a/b;c=123
+        String queryString = req.getQueryString();          // d=789
+
+        // Reconstruct original requesting URL
+        StringBuffer url =  new StringBuffer();
+        url.append(scheme).append("://").append(serverName);
+
+        if ((serverPort != 80) && (serverPort != 443)) {
+            url.append(":").append(serverPort);
+        }
+
+        if (withPath) {
+            url.append(contextPath).append(servletPath);
+
+            if (pathInfo != null) {
+                url.append(pathInfo);
+            }
+            if (queryString != null) {
+                url.append("?").append(queryString);
+            }
+        }
+        return url.toString();
+    }
 
 }
