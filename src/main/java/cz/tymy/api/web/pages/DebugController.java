@@ -19,7 +19,7 @@ public class DebugController extends AbstractController {
 
     @RequestMapping(value = "/debug13", method = RequestMethod.GET)
     public String main(ModelMap model, HttpSession session, HttpServletRequest request) {
-        addCommonVars(model);
+        addCommonVars(model, request);
         return "debug";
     }
 

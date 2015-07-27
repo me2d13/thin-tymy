@@ -14,7 +14,8 @@
     <link rel='stylesheet' href='<c:url value="/webjars/bootstrap/3.3.5/css/bootstrap.min.css" />'>
     <link href="<c:url value="/static/css/main.css" />" rel="stylesheet">
     <script src="<c:url value="/webjars/jquery/2.1.4/jquery.min.js" />"></script>
-    
+    <script src="<c:url value="/webjars/bootstrap/3.3.5/js/bootstrap.min.js" />"></script>
+    <script src="<c:url value="/static/js/sys.js" />"></script>
     <c:if test="${! empty jsFiles}">
         <c:forEach var="jsFile" items="${jsFiles}">
             <script src="<c:url value="/static/js/${jsFile}" />"></script>
@@ -28,6 +29,9 @@
     <div class="col-xs-6">${teamSysName}.tymy.cz</div>
     <div class="col-xs-6 text-right">logout</div>
 </header>
+<div class="row" id="feedbackRow">
+    <div class="col-xs-12 text-center" id="feedback"></div>
+</div>
 <main>
     <jsp:include page="/${includePage}"></jsp:include>
 </main>

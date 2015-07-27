@@ -9,14 +9,23 @@ function loadNewItems() {
         clearTimeout(timer);
     }
     $("#ds-list > a > span").text("?");
-    $.getJSON("/api/discussions/newOnly", function(data, status){
-        if (status=="success" && data.status=="OK") {
-            $.each(data.data, function(key, value) {
-                $("#ds-" + value.id).text(value.newPosts);
-            })
+    $.ajax({
+        url: '/api/discussions/newOnly',
+        dataType: "json",
+        success: function(data) {
+            if (data.status == "OK") {
+                $.each(data.data, function (key, value) {
+                    $("#ds-" + value.id).text(value.newPosts);
+                });
+                timer = setTimeout(loadNewItems, 120000); // 2 minutes
+            } else {
+                feedbackError(data.status);
+            }
+        },
+        error: function(data) {
+            feedbackError(data.statusText);
         }
     });
-    timer = setTimeout(loadNewItems, 120000); // 2 minutes
 }
 
 $(document).ready(function () {

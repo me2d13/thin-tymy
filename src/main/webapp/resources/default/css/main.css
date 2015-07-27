@@ -1,3 +1,11 @@
 header {
     background-color: cornsilk;
 }
+
+.flex-row {
+    display: flex;
+}
+
+.post-picture {
+    width: 45px;
+}

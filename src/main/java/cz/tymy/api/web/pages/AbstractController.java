@@ -5,6 +5,7 @@ import cz.tymy.model.RestResponse;
 import cz.tymy.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +18,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -24,21 +27,45 @@ import java.util.stream.Collectors;
  */
 public class AbstractController {
 
+    @Value("${fixedTeamName:}")
+    private String fixedTeamName;
+
+    @Value("${teamNamePattern:}")
+    private String teamNamePattern;
+
+    @Value("${apiUrl:}")
+    private String fixedApiUrl;
+
     private static final String ATTR_TEAM_SYS_NAME = "teamSysName";
     private static final String ATTR_SESSION_KEY = "TSID";
     private static final String PHP_SESSION_ID = "PHPSESSID";
     private static final String ATTR_JS_FILES = "jsFiles";
+    protected static final String ATTR_PAGE_TITLE = "pageTitle";
 
     private static Logger LOG = Logger.getLogger(AbstractController.class);
 
     protected RestTemplate restTemplate = new RestTemplate();
 
-    protected void addCommonVars(ModelMap model) {
-        model.addAttribute(ATTR_TEAM_SYS_NAME, getTeamSysName());
+    protected void addCommonVars(ModelMap model, HttpServletRequest sr) {
+        String teamSysName = getTeamSysName(sr);
+        model.addAttribute(ATTR_TEAM_SYS_NAME, teamSysName);
+        model.addAttribute(ATTR_PAGE_TITLE, String.format("%s.tymy.cz", teamSysName));
     }
 
-    protected String getTeamSysName() {
-        return "pd";
+    protected String getTeamSysName(HttpServletRequest sr) {
+        if (org.springframework.util.StringUtils.hasText(fixedTeamName)) {
+            return fixedTeamName;
+        }
+        if (org.springframework.util.StringUtils.hasText(teamNamePattern)) {
+            Pattern p = Pattern.compile(teamNamePattern);
+            Matcher m = p.matcher(sr.getRequestURL().toString());
+            if (m.matches() && m.groupCount() == 1) {
+                return m.group(1);
+            } else {
+                LOG.warn("No regexp match for " + sr.getRequestURL().toString() + " with pattern " + teamNamePattern);
+            }
+        }
+        return null;
     }
 
     protected boolean checkLogin(HttpServletRequest request, HttpSession session, ModelMap model) {
@@ -115,9 +142,14 @@ public class AbstractController {
                     }
                 }
             }
-            URL baseUrl = new URL(request.getRequestURL().toString());
-            URL url = new URL(baseUrl , String.format("../api/%s", apiPage));
-            result = url.toString();
+            if (StringUtils.isNotBlank(fixedApiUrl)) {
+                result = String.format("%s/%s", fixedApiUrl, apiPage);
+            } else {
+                // get from request
+                URL baseUrl = new URL(request.getRequestURL().toString());
+                URL url = new URL(baseUrl , String.format("../api/%s", apiPage));
+                result = url.toString();
+            }
             LOG.debug(String.format("Querying API [%s]", result));
         } catch (MalformedURLException e) {
             LOG.error(String.format("Cannot build API url from request %s and API path %s.", request.getRequestURL().toString(), apiPage));

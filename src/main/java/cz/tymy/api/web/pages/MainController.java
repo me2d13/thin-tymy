@@ -23,7 +23,7 @@ public class MainController extends AbstractController {
         if (!checkLogin(request, session, model)) {
             return String.format("redirect:%s", getURL(request, false));
         }
-        addCommonVars(model);
+        addCommonVars(model, request);
         addJavascript(model, "main.js");
         RestResponse<List<Discussion>> discussions = restTemplate.getForObject(apiUrl("discussions/accessible", request, session), RestResponse.class);
         model.addAttribute("discussions", discussions);

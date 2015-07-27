@@ -4,7 +4,7 @@
     <div class="panel-heading">Diskuze <a href="#" id="dsRefresh"><span class="glyphicon glyphicon-refresh"></span></a></div>
     <ul class="panel-body list-group" id="ds-list">
         <c:forEach var="dis" items="${discussions.data}">
-            <a href="#" class="list-group-item"><span class="badge" id="ds-${dis.id}">?</span>${dis.caption}</a>
+            <a href="<c:url value="/ds/${dis.id}" />" class="list-group-item"><span class="badge" id="ds-${dis.id}">?</span>${dis.caption}</a>
         </c:forEach>
     </ul>
 </div>
