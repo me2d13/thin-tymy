@@ -26,7 +26,7 @@
 </head>
 <body class="container">
 <header class="row">
-    <div class="col-xs-6">${teamSysName}.tymy.cz</div>
+    <div class="col-xs-6"><a href="http://${teamSysName}.tymy.cz">${teamSysName}.tymy.cz</a> : <a href="<c:url value="/main" />">thin</a></div>
     <div class="col-xs-6 text-right">logout</div>
 </header>
 <div class="row" id="feedbackRow">

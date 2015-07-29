@@ -1,7 +1,9 @@
 package cz.tymy.api.web.pages;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import cz.tymy.model.Discussion;
 import cz.tymy.model.RestResponse;
+import cz.tymy.model.RestResponseStatus;
 import cz.tymy.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
  */
 public class AbstractController {
 
+    private static final String ATTR_TEXTS = "txt";
     @Value("${fixedTeamName:}")
     private String fixedTeamName;
 
@@ -156,6 +159,18 @@ public class AbstractController {
         }
         return result;
     }
+
+    protected void addTxt(String domain, ModelMap model, HttpServletRequest request, HttpSession session) {
+        RestResponse<Object> txt = restTemplate.getForObject(apiUrl(String.format("caption/cs/%s/", domain),
+                request, session), RestResponse.class);
+        if (txt != null && txt.getStatus() == RestResponseStatus.OK) {
+            model.addAttribute(ATTR_TEXTS, txt.getMessages());
+        } else {
+            LOG.error("Cannot fetch texts.");
+        }
+    }
+
+
 
     public static String getURL(HttpServletRequest req, boolean withPath) {
 
