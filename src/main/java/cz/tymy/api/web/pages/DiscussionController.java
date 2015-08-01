@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.tymy.api.dto.PostForm;
+import cz.tymy.model.Post;
 import cz.tymy.model.RestResponse;
+import cz.tymy.model.RestResponseStatus;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -23,17 +25,24 @@ import javax.servlet.http.HttpSession;
 @Controller
 public class DiscussionController extends AbstractController {
 
+    private static final String ATTR_PREVIEW = "preview";
     private static Logger LOG = Logger.getLogger(DiscussionController.class);
 
     @RequestMapping(value = "/ds/{dsId}", method = RequestMethod.GET)
-    public String show(@ModelAttribute("post")PostForm postForm, BindingResult bindingResult, ModelMap model, @PathVariable Integer dsId, HttpSession session, HttpServletRequest request) {
+    public String show(@ModelAttribute("post")PostForm postForm, ModelMap model, @PathVariable Integer dsId, HttpSession session, HttpServletRequest request) {
         if (!checkLogin(request, session, model)) {
             return String.format("redirect:%s", getURL(request, false));
         }
         addCommonVars(model, request);
         addTxt("discussion", model, request, session);
         //addJavascript(model, "main.js");
-        JsonNode discussion = restTemplate.getForObject(apiUrl(String.format("discussion/%d/bb/1", dsId),
+        loadDiscussionToModel(model, dsId, session, request);
+        model.addAttribute("includePage", "/WEB-INF/jsp/ds.jsp");
+        return "skeleton";
+    }
+
+    private void loadDiscussionToModel(ModelMap model, @PathVariable Integer dsId, HttpSession session, HttpServletRequest request) {
+        JsonNode discussion = restTemplate.getForObject(apiUrl(String.format("discussion/%d/html/1", dsId),
                 request, session), JsonNode.class);
         model.addAttribute(ATTR_PAGE_TITLE, discussion.path("data").path("discussion").path("caption").asText());
         ObjectMapper mapper = new ObjectMapper();
@@ -44,20 +53,43 @@ public class DiscussionController extends AbstractController {
         } catch (JsonProcessingException e) {
             LOG.error("Cannot convert REST response to objects", e);
         }
-        model.addAttribute("includePage", "/WEB-INF/jsp/ds.jsp");
-        return "skeleton";
     }
 
     @RequestMapping(value = "/ds/{dsId}", params = "save", method = RequestMethod.POST)
-    public String post(@ModelAttribute("post")PostForm postForm, @PathVariable Integer dsId, HttpSession session,
-                       HttpServletRequest request, BindingResult bindingResult) {
+    public String post(@ModelAttribute("post")PostForm postForm, BindingResult bindingResult, @PathVariable Integer dsId, HttpSession session,
+                       HttpServletRequest request, ModelMap model) {
+        Post post = new Post();
+        post.setPost(postForm.getPost());
+        RestResponse result = restTemplate.postForObject(apiUrl(String.format("discussion/%d/post", dsId), request, session), post, RestResponse.class);
+        if (result == null || result.getStatus() == RestResponseStatus.ERROR) {
+            addCommonVars(model, request);
+            addTxt("discussion", model, request, session);
+            addError(model, result.getStatusMessage());
+            loadDiscussionToModel(model, dsId, session, request);
+            model.addAttribute("includePage", "/WEB-INF/jsp/ds.jsp");
+            return "skeleton";
+        }
         return "redirect:/ds/"+dsId.toString();
     }
 
     @RequestMapping(value = "/ds/{dsId}", params = "preview", method = RequestMethod.POST)
     public String preview(@ModelAttribute("post")PostForm postForm, @PathVariable Integer dsId, HttpSession session,
-                       HttpServletRequest request, BindingResult bindingResult) {
-        return "redirect:/ds/"+dsId.toString();
+                       HttpServletRequest request, ModelMap model) {
+        addCommonVars(model, request);
+        addTxt("discussion", model, request, session);
+        Post post = new Post();
+        post.setPost(postForm.getPost());
+        RestResponse result = restTemplate.postForObject(apiUrl("discussion/preview", request, session), post, RestResponse.class);
+        if (result != null && result.getStatus() == RestResponseStatus.OK) {
+            model.addAttribute(ATTR_PREVIEW, result.getData().toString());
+        } else if (result != null) {
+            addError(model, result.getStatusMessage());
+        } else {
+            LOG.error("Null response from preview API call");
+        }
+        loadDiscussionToModel(model, dsId, session, request);
+        model.addAttribute("includePage", "/WEB-INF/jsp/ds.jsp");
+        return "skeleton";
     }
 
 }

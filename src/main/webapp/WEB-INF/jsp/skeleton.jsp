@@ -30,7 +30,13 @@
     <div class="col-xs-6 text-right">logout</div>
 </header>
 <div class="row" id="feedbackRow">
-    <div class="col-xs-12 text-center" id="feedback"></div>
+    <div class="col-xs-12 text-center" id="feedback">
+        <c:forEach var="error" items="${errors}">
+            <div class="alert alert-danger fade in">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>${error}
+            </div>
+        </c:forEach>
+    </div>
 </div>
 <main>
     <jsp:include page="/${includePage}"></jsp:include>

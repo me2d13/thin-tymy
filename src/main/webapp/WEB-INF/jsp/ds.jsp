@@ -33,6 +33,9 @@
         <div class="col-xs-1"></div>
     </div>
 </c:if>
+<c:if test="${not empty preview}">
+    ${preview}
+</c:if>
 <c:forEach var="post" items="${ds.data.posts}">
     <div class="ds-row <c:if test="${post.newPost}">new-post</c:if>">
         <div class="post-picture"><img src="${post.createdBy.pictureUrl}"/></div>

@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class AbstractController {
 
     private static final String ATTR_TEXTS = "txt";
+    private static final String ATTR_ERRORS = "errors";
     @Value("${fixedTeamName:}")
     private String fixedTeamName;
 
@@ -122,6 +123,12 @@ public class AbstractController {
         List<String> jsFiles = (List<String>) model.getOrDefault(ATTR_JS_FILES, new ArrayList<String>());
         jsFiles.add(file);
         model.addAttribute(ATTR_JS_FILES, jsFiles);
+    }
+
+    protected void addError(ModelMap model, String message) {
+        List<String> errors = (List<String>) model.getOrDefault(ATTR_ERRORS, new ArrayList<String>());
+        errors.add(message);
+        model.addAttribute(ATTR_ERRORS, errors);
     }
 
     protected String apiUrl(String apiPage, HttpServletRequest request) {
