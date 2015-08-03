@@ -137,33 +137,27 @@ public class AbstractController {
 
     protected String apiUrl(String apiPage, HttpServletRequest request, HttpSession session) {
         String result = null;
-        try {
-            if (session != null) {
-                String tsid = (String) session.getAttribute(ATTR_SESSION_KEY);
-                if (StringUtils.isNotBlank(tsid)) {
-                    if (apiPage.contains("?")) {
-                        apiPage += String.format("&%s=%s", ATTR_SESSION_KEY, tsid);
+        if (session != null) {
+            String tsid = (String) session.getAttribute(ATTR_SESSION_KEY);
+            if (StringUtils.isNotBlank(tsid)) {
+                if (apiPage.contains("?")) {
+                    apiPage += String.format("&%s=%s", ATTR_SESSION_KEY, tsid);
+                } else {
+                    if (apiPage.endsWith("/")) {
+                        apiPage += String.format("?%s=%s", ATTR_SESSION_KEY, tsid);
                     } else {
-                        if (apiPage.endsWith("/")) {
-                            apiPage += String.format("?%s=%s", ATTR_SESSION_KEY, tsid);
-                        } else {
-                            apiPage += String.format("/?%s=%s", ATTR_SESSION_KEY, tsid);
-                        }
+                        apiPage += String.format("/?%s=%s", ATTR_SESSION_KEY, tsid);
                     }
                 }
             }
-            if (StringUtils.isNotBlank(fixedApiUrl)) {
-                result = String.format("%s/%s", fixedApiUrl, apiPage);
-            } else {
-                // get from request
-                URL baseUrl = new URL(request.getRequestURL().toString());
-                URL url = new URL(baseUrl , String.format("../api/%s", apiPage));
-                result = url.toString();
-            }
-            LOG.debug(String.format("Querying API [%s]", result));
-        } catch (MalformedURLException e) {
-            LOG.error(String.format("Cannot build API url from request %s and API path %s.", request.getRequestURL().toString(), apiPage));
         }
+        if (StringUtils.isNotBlank(fixedApiUrl)) {
+            result = String.format("%s/%s", fixedApiUrl, apiPage);
+        } else {
+            // get from request
+            result = String.format("%s/api/%s", getURL(request, false), apiPage);
+        }
+        LOG.debug(String.format("Querying API [%s]", result));
         return result;
     }
 
@@ -178,7 +172,6 @@ public class AbstractController {
     }
 
 
-
     public static String getURL(HttpServletRequest req, boolean withPath) {
 
         String scheme = req.getScheme();             // http
@@ -190,7 +183,7 @@ public class AbstractController {
         String queryString = req.getQueryString();          // d=789
 
         // Reconstruct original requesting URL
-        StringBuffer url =  new StringBuffer();
+        StringBuffer url = new StringBuffer();
         url.append(scheme).append("://").append(serverName);
 
         if ((serverPort != 80) && (serverPort != 443)) {
