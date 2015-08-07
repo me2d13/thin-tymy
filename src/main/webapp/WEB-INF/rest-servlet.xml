@@ -62,6 +62,7 @@
 	<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
 
 	<mvc:resources mapping="/static/**" location="/resources/default/" cache-period="31556926"/>
+	<mvc:resources mapping="/cal/**" location="/resources/cal/" cache-period="31556926"/>
 
 </beans>
 

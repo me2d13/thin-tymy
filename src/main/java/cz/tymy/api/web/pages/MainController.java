@@ -24,7 +24,9 @@ public class MainController extends AbstractController {
             return String.format("redirect:%s", getURL(request, false));
         }
         addCommonVars(model, request);
-        addJavascript(model, "main.js");
+        addJavascript(model, "/static/js/main.js");
+        addJavascript(model, "/cal/bic_calendar.js");
+        addCss(model, "/cal/bic_calendar.css");
         RestResponse<List<Discussion>> discussions = restTemplate.getForObject(apiUrl("discussions/accessible", request, session), RestResponse.class);
         model.addAttribute("discussions", discussions);
         model.addAttribute("includePage", "/WEB-INF/jsp/main.jsp");

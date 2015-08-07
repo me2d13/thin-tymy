@@ -11,22 +11,25 @@
     <title>${pageTitle}</title>
 
     <!-- Bootstrap -->
-    <link rel='stylesheet' href='<c:url value="/webjars/bootstrap/3.3.5/css/bootstrap.min.css" />'>
-    <link href="<c:url value="/static/css/main.css" />" rel="stylesheet">
+    <link rel='stylesheet' href='<c:url value="/webjars/bootstrap/3.3.5/css/bootstrap.min.css" />'/>
+    <link href="<c:url value="/static/css/main.css" />" rel="stylesheet"/>
+    <c:if test="${! empty cssFiles}">
+        <c:forEach var="cssFile" items="${cssFiles}">
+            <link href="<c:url value="${cssFile}" />" rel="stylesheet" />
+        </c:forEach>
+    </c:if>
     <script src="<c:url value="/webjars/jquery/2.1.4/jquery.min.js" />"></script>
     <script src="<c:url value="/webjars/bootstrap/3.3.5/js/bootstrap.min.js" />"></script>
     <script src="<c:url value="/static/js/sys.js" />"></script>
     <c:if test="${! empty jsFiles}">
         <c:forEach var="jsFile" items="${jsFiles}">
-            <script src="<c:url value="/static/js/${jsFile}" />"></script>
+            <script src="<c:url value="${jsFile}" />"></script>
         </c:forEach>
     </c:if>
-    
-    <link href="<c:url value="/static/css/main.css" />" rel="stylesheet">
 </head>
 <body class="container">
 <header class="row">
-    <div class="col-xs-6"><a href="http://${teamSysName}.tymy.cz">${teamSysName}.tymy.cz</a> : <a href="<c:url value="/main" />">thin</a></div>
+    <div class="col-xs-6"><a href="http://${teamSysName}.tymy.cz">${teamSysName}.tymy.cz</a> : <a href="<c:url value="/main" />">main</a></div>
     <div class="col-xs-6 text-right">logout</div>
 </header>
 <div class="row" id="feedbackRow">

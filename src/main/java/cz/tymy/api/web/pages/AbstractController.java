@@ -44,6 +44,7 @@ public class AbstractController {
     private static final String ATTR_SESSION_KEY = "TSID";
     private static final String PHP_SESSION_ID = "PHPSESSID";
     private static final String ATTR_JS_FILES = "jsFiles";
+    private static final String ATTR_CSS_FILES = "cssFiles";
     protected static final String ATTR_PAGE_TITLE = "pageTitle";
 
     private static Logger LOG = Logger.getLogger(AbstractController.class);
@@ -123,6 +124,12 @@ public class AbstractController {
         List<String> jsFiles = (List<String>) model.getOrDefault(ATTR_JS_FILES, new ArrayList<String>());
         jsFiles.add(file);
         model.addAttribute(ATTR_JS_FILES, jsFiles);
+    }
+
+    protected void addCss(ModelMap model, String file) {
+        List<String> cssFiles = (List<String>) model.getOrDefault(ATTR_CSS_FILES, new ArrayList<String>());
+        cssFiles.add(file);
+        model.addAttribute(ATTR_CSS_FILES, cssFiles);
     }
 
     protected void addError(ModelMap model, String message) {
