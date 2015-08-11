@@ -50,6 +50,11 @@ $.fn.bic_calendar = function(options) {
         else
             monthOffset = 0;
 
+        var dateChangeCallback = null;
+        if ($.isFunction(opts.dateChangeCallback)) {
+            dateChangeCallback = opts.dateChangeCallback;
+        }
+
         var dayNames;
         if (typeof opts.dayNames != "undefined")
             dayNames = opts.dayNames;
@@ -150,6 +155,9 @@ $.fn.bic_calendar = function(options) {
                     }
                 });
                 document.dispatchEvent(eventDate);
+                if (dateChangeCallback != null) {
+                    dateChangeCallback(month, year);
+                }
             })
             var previousMonthButton = $('<td><a href="#" class="button-month-previous"><i class="glyphicon glyphicon-arrow-left" ></i></a></td>');
             //event
@@ -167,6 +175,9 @@ $.fn.bic_calendar = function(options) {
                     }
                 });
                 document.dispatchEvent(eventDate);
+                if (dateChangeCallback != null) {
+                    dateChangeCallback(month, year);
+                }
             })
 
             //next-previous year controllers
@@ -182,6 +193,9 @@ $.fn.bic_calendar = function(options) {
                     }
                 });
                 document.dispatchEvent(eventDate);
+                if (dateChangeCallback != null) {
+                    dateChangeCallback(month, year);
+                }
             })
             var previousYearButton = $('<td><a href="#" class="button-year-previous"><i class="glyphicon glyphicon-arrow-left" ></i></a></td>');
             //event
@@ -195,6 +209,9 @@ $.fn.bic_calendar = function(options) {
                     }
                 });
                 document.dispatchEvent(eventDate);
+                if (dateChangeCallback != null) {
+                    dateChangeCallback(month, year);
+                }
             })
 
 
@@ -233,7 +250,7 @@ $.fn.bic_calendar = function(options) {
             elem.append(calendar);
 
             //check and add events
-            checkEvents(month, year);
+            //checkEvents(month, year);
 
             //if enable select
             checkIfEnableMark();
@@ -243,6 +260,15 @@ $.fn.bic_calendar = function(options) {
          * indeed, change month or year
          */
         function changeDate(month, year) {
+            my = considerOffset(month, year);
+            daysMonthLayer.empty();
+            listListeralsWeek();
+            showMonthDays(my["month"], my["year"]);
+            checkEvents(my["month"], my["year"]);
+            markSelectedDays();
+        }
+
+        function considerOffset(month, year) {
             month += monthOffset;
             if (month == -1) {
                 year--;
@@ -252,11 +278,7 @@ $.fn.bic_calendar = function(options) {
                 year++;
                 month = 0;
             }
-            daysMonthLayer.empty();
-            listListeralsWeek();
-            showMonthDays(month, year);
-            checkEvents(month, year);
-            markSelectedDays();
+            return {"month" : month, "year" : year };
         }
 
         /**
@@ -321,7 +343,7 @@ $.fn.bic_calendar = function(options) {
                     dayCode += '<td id="' + calendarId + '_' + daysCounter + "_" + nMonth + "_" + year + '" data-date="' + nMonth + "/" + daysCounter + "/" + year + '" ';
                     //add weekDay
                     dayCode += ' class="day week-day-' + i + '"';
-                    dayCode += '><div><a>' + daysCounter + '</a></div></span>';
+                    dayCode += '><div>' + daysCounter + '</div></span>';
                     if (i == 6)
                         dayCode += '</tr>';
                     daysCounter++;
@@ -338,7 +360,7 @@ $.fn.bic_calendar = function(options) {
                 dayCode += '<td id="' + calendarId + '_' + daysCounter + "_" + nMonth + "_" + year + '" data-date="' + nMonth + "/" + daysCounter + "/" + year + '" ';
                 //add weekDay
                 dayCode += ' class="day week-day-' + ((currentWeekDay - 1) % 7) + '"';
-                dayCode += '><div><a>' + daysCounter + '</a></div></td>';
+                dayCode += '><div>' + daysCounter + '</div></td>';
                 if (currentWeekDay % 7 == 0)
                     dayCode += "</tr>";
                 daysCounter++;
@@ -438,15 +460,21 @@ $.fn.bic_calendar = function(options) {
         /**
          * mark all the events n create logic for them
          */
-        function markEvents(month, year) {
-            var temporalMonth = month + 1;
+        function markEvents(month, year, pEvents) {
+            if (typeof pEvents !== 'undefined') {
+                events = pEvents;
+            }
+            my = considerOffset(month, year);
+            var temporalMonth = my["month"] + 1;
 
             for (var i = 0; i < events.length; i++) {
-
-                if (events[i].date.split('/')[1] == temporalMonth && events[i].date.split('/')[2] == year) {
+                var dateParts = events[i].date.split('/');
+                if (dateParts[1] == temporalMonth && dateParts[2] == my["year"]) {
 
                     var loopDayTd = $('#' + calendarId + '_' + events[i].date.replace(/\//g, "_"));
-                    var loopDayA = $('#' + calendarId + '_' + events[i].date.replace(/\//g, "_") + ' a');
+                    var loopDayDiv = $('#' + calendarId + '_' + events[i].date.replace(/\//g, "_") + ' div');
+                    loopDayDiv.html($("<a></a>").text(dateParts[0]));
+                    var loopDayA = $('#' + calendarId + '_' + events[i].date.replace(/\//g, "_") + ' div a');
 
                     loopDayTd.addClass('event');
 
@@ -584,10 +612,15 @@ $.fn.bic_calendar = function(options) {
 
         function addListeners() {
             document.addEventListener("bicCalendarNewDate", doPlusOne, false);
+            document.addEventListener("bicCalendarMarkEvents", doMarkEvents, false);
         }
 
         function doPlusOne(event) {
             changeDate(event.detail.month, event.detail.year);
+        }
+
+        function doMarkEvents(event) {
+            markEvents(event.detail.month, event.detail.year, event.detail.events);
         }
 
         /*** --functions-- ***/
