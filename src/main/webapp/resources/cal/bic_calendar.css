@@ -61,6 +61,9 @@
 .bic_calendar .event a{
     color: white;
 }
+.bic_calendar .event .popover-content a{
+    color: blue;
+}
 .bic_calendar .table{
     margin-bottom: 3px;
 }

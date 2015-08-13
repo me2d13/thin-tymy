@@ -465,55 +465,90 @@ $.fn.bic_calendar = function(options) {
                 events = pEvents;
             }
             my = considerOffset(month, year);
-            var temporalMonth = my["month"] + 1;
 
-            for (var i = 0; i < events.length; i++) {
-                var dateParts = events[i].date.split('/');
-                if (dateParts[1] == temporalMonth && dateParts[2] == my["year"]) {
+            var eventsMap = convertEventsListToMap(events, my["month"] + 1, my["year"]);
 
-                    var loopDayTd = $('#' + calendarId + '_' + events[i].date.replace(/\//g, "_"));
-                    var loopDayDiv = $('#' + calendarId + '_' + events[i].date.replace(/\//g, "_") + ' div');
-                    loopDayDiv.html($("<a></a>").text(dateParts[0]));
-                    var loopDayA = $('#' + calendarId + '_' + events[i].date.replace(/\//g, "_") + ' div a');
-
-                    loopDayTd.addClass('event');
-
-                    loopDayA.attr('data-original-title', events[i].title);
-
-                    //bg color
-                    if (events[i].color)
-                        loopDayTd.css('background', events[i].color);
-
-                    //link
-                    if (typeof events[i].link != 'undefined' && events[i].link != '') {
-                        loopDayA.attr('href', events[i].link);
-                    }
-                    if (typeof events[i].linkTarget != 'undefined' && events[i].linkTarget != '') {
-                        loopDayA.attr('target', events[i].linkTarget);
-                    }
-
-                    //class
-                    if (events[i].class)
-                        loopDayTd.addClass(events[i].class);
-
-                    //tooltip vs popover
-                    if (events[i].content) {
-                        loopDayTd.addClass('event_popover');
-                        loopDayA.attr('rel', 'popover');
-                        loopDayA.attr('data-content', events[i].content);
-                    } else {
-                        loopDayTd.addClass('event_tooltip');
-                        loopDayA.attr('rel', 'tooltip');
-                    }
+            for (var i = 1; i <= 31; i++) {
+                var lEvent = eventsMap[i];
+                if (lEvent) {
+                    var loopDayTd = $('#' + calendarId + '_' + lEvent[0].date.replace(/\//g, "_"));
+                    renderCellWithEvents(loopDayTd, lEvent, i);
                 }
             }
 
-            $('#' + calendarId + ' ' + '.event_tooltip a').tooltip(tooltipOptions);
-            $('#' + calendarId + ' ' + '.event_popover a').popover(popoverOptions);
+            //$('#' + calendarId + ' ' + '.event_tooltip a').tooltip(tooltipOptions);
+            //$('#' + calendarId + ' ' + '.event_popover a').popover(popoverOptions);
+            $('[data-toggle="tooltip"]').tooltip(tooltipOptions);
+            if (isTouchDevice) {
+                $('[data-toggle="popover"]').popover({trigger: "click", html: true, animation: true});
+            } else {
+                $('[data-toggle="popover"]').popover({trigger: "manual", html: true, animation: false})
+                    .on("mouseenter", function () {
+                        var _this = this;
+                        $(this).popover("show");
+                        $(".popover").on("mouseleave", function () {
+                            $(_this).popover('hide');
+                        });
+                    }).on("mouseleave", function () {
+                        var _this = this;
+                        setTimeout(function () {
+                            if (!$(".popover:hover").length) {
+                                $(_this).popover("hide");
+                            }
+                        }, 300);
+                    });
+            }
+            //$('[data-toggle="popover"]').popover({ trigger: "click", html: true});
 
-            $('.manual_popover').click(function() {
+                $('.manual_popover').click(function() {
                 $(this).popover('toggle');
             });
+        }
+
+        // convert list of events to map with day number as key and array of events as value
+        function convertEventsListToMap(events, pMonth, pYear) {
+            var result = {};
+            for (var i = 0; i < events.length; i++) {
+                var dateParts = events[i].date.split('/');
+                if (dateParts[1] == pMonth && dateParts[2] == pYear) {
+                    var lDay = dateParts[0];
+                    if (!result[lDay]) {
+                        result[lDay] = [];
+                    }
+                    result[lDay].push(events[i]);
+                }
+            }
+            return result;
+        }
+
+        function encodeHTML(lIn) {
+            return lIn.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+
+        function renderCellWithEvents(pTd, pEvents, pDay) {
+            if (pEvents.length == 1) {
+                var lTooltipDef = ' data-toggle="tooltip" title="' + pEvents[0].title + '" ';
+                pTd.html('<a href="'+getLinkForEvent(pEvents[0])+'"' +lTooltipDef+"><div>"+pDay+"</div></a>");
+            } else {
+                var lPopoverContent = '';
+                $.each(pEvents, function(index, value) {
+                    lPopoverContent += '<a href=\"'+getLinkForEvent(value)+'\" class=\"btn btn-default\">'+value.title+'</a>';
+                    if (index + 1 < pEvents.length) {
+                        lPopoverContent += '<br />';
+                    }
+                });
+                var lPopoverDef = ' data-toggle="popover" title="" data-content="'+(encodeHTML(lPopoverContent))+'" ';
+                pTd.html("<div "+lPopoverDef+">"+pDay+"</div>");
+            }
+            pTd.addClass('event');
+        }
+
+        function getLinkForEvent(pEvent) {
+            return "/new/event/"+pEvent.id;
         }
 
         /**

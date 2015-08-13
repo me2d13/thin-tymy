@@ -9,6 +9,10 @@ var year = new Date().getFullYear();
 
 var calEvents = [];
 
+var isTouchDevice = ("ontouchstart" in window) || window.DocumentTouch && document instanceof DocumentTouch;
+//var isTouchDevice = true;
+
+
 function fetchEvents() {
     var lMonth = month - 1;
     var lYear = year;
