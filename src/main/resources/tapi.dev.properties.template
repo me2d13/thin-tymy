@@ -1,0 +1,3 @@
+#fixedTeamName=dev
+teamNamePattern=.+[\\./]([^./]+)\\.tymy\\..+
+teamHostNamePattern=%s.tymy.cz
