@@ -1,3 +1,4 @@
 #fixedTeamName=dev
 teamNamePattern=.+[\\./]([^./]+)\\.tymy\\..+
 teamHostNamePattern=%s.tymy.cz
+apiUrl=http://192.168.1.5:8180/api

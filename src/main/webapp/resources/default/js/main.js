@@ -53,7 +53,7 @@ function convertApiEventsToCalEvents(pMonth, pYear, events) {
         lEvent["date"] = "" + lDate.getDate() + "/" + (lDate.getMonth()+1) + "/" + lDate.getFullYear();
         lEvent["title"] = value.caption;
         lEvent["content"] = value.caption;
-        lEvent["link"] = "http://www.tymy.cz";
+        lEvent["id"] = value.id;
         lEvents.push(lEvent);
     });
     var eventDate = new CustomEvent("bicCalendarMarkEvents", {
