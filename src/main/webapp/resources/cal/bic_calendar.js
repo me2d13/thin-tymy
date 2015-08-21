@@ -548,7 +548,8 @@ $.fn.bic_calendar = function(options) {
         }
 
         function getLinkForEvent(pEvent) {
-            return "/new/event/"+pEvent.id;
+            //return "/new/event/"+pEvent.id;
+            return pEvent.link;
         }
 
         /**

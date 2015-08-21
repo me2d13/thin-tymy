@@ -9,9 +9,6 @@ var year = new Date().getFullYear();
 
 var calEvents = [];
 
-var isTouchDevice = ("ontouchstart" in window) || window.DocumentTouch && document instanceof DocumentTouch;
-//var isTouchDevice = true;
-
 
 function fetchEvents() {
     var lMonth = month - 1;
@@ -30,7 +27,7 @@ function fetchEvents() {
     var lUrl = "/api/events?filter=" + lFilter;
 
     $.ajax({
-        url: lUrl,
+        url: apiLink(lUrl),
         dataType: "json",
         success: function (data) {
             if (data.status == "OK") {
@@ -54,6 +51,7 @@ function convertApiEventsToCalEvents(pMonth, pYear, events) {
         lEvent["title"] = value.caption;
         lEvent["content"] = value.caption;
         lEvent["id"] = value.id;
+        lEvent["link"] = contextPath + "/event/" + value.id;
         lEvents.push(lEvent);
     });
     var eventDate = new CustomEvent("bicCalendarMarkEvents", {
@@ -72,7 +70,7 @@ function loadNewItems() {
     }
     $("#ds-list > a > span").text("?");
     $.ajax({
-        url: '/api/discussions/newOnly',
+        url: apiLink('/api/discussions/newOnly'),
         dataType: "json",
         success: function (data) {
             if (data.status == "OK") {

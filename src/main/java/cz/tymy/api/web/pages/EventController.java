@@ -30,7 +30,8 @@ public class EventController extends AbstractController {
         }
         addCommonVars(model, request);
         addTxt("event_detail", model, request, session);
-        addJavascript(model, "event.js");
+        addJavascript(model, "/static/js/event.js");
+        addJavascript(model, "/static/js/Sortable.js");
         //loadEventToModel(model, evId, session, request);
         // let's call the API in js
         model.addAttribute("eventId", evId);
