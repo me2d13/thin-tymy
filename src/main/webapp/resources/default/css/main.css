@@ -30,3 +30,22 @@ header {
 .sortable-container {
     min-height:50px;
 }
+
+.ev_det_user {
+    display: inline-block;
+    position: relative;
+    width: 90px;
+    height: 60px;
+}
+
+.ev_det_user img:nth-child(2) {
+    position: absolute;
+    left: 45px;
+    top: 3px;
+}
+
+.ev_det_user img:nth-child(3) {
+    position: absolute;
+    left: 45px;
+    top: 28px;
+}

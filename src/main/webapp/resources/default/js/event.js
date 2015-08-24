@@ -1,4 +1,4 @@
-var dimensions = ["postStatus", "preStatus", "sex", "role"];
+var dimensions = ["postStatus", "preStatus", "sex", "status"];
 
 var attendanceData = {};
 
@@ -36,6 +36,7 @@ function processData(data) {
     attendanceData = data;
     distCount = countDistinct(data, dimensions);
     addDimensions(distCount);
+    onDimMove();
 }
 
 function countDistinct(data, dimensions) {
@@ -77,7 +78,7 @@ function getAttDimension(att, dim) {
             return att.preStatus;
         //case "sex":
         //    return att.user.sex;
-        //case "role": return att.user.role;
+        case "status": return att.user.status;
     }
 }
 
@@ -105,7 +106,7 @@ function onDimMove(event) {
     var used = getUsedDimensions();
     var attMap = organizeByDimmensions(used, attendanceData.attendance.slice());
     refreshGui(attMap);
-    console.log(attMap);
+    //console.log(attMap);
 }
 
 function organizeByDimmensions(dims, attData) {
@@ -146,6 +147,8 @@ function groupByFirstDimmension(result, dims) {
 function refreshGui(attMap) {
     $("#attendance").fadeOut('fast', function() {
         $("#attendance").empty();
+        console.log("Building from");
+        console.log(attMap);
         buildDom(attMap, $("#attendance"));
         $("#attendance").fadeIn('fast');
     })
@@ -155,22 +158,45 @@ function buildDom(attMap, parent) {
     if (attMap.map === undefined && attMap.data !== undefined && attMap.data.length > 0) {
         buildUsers(attMap.data, parent);
     } else if (attMap.map !== undefined) {
-        buildGroups(attMap.map, parent);
+        buildGroups(attMap.map, attMap.empty, parent);
     } else {
+        console.log("Neither data nor attMap:");
         console.log(attMap);
     }
 }
 
-function buildUsers(users, parent) {
-    parent.append($('<div>').append(users.length));
+function buildUsers(attDataArray, parent) {
+    for (var attData of attDataArray) {
+        //container
+        var uDiv = $('<div>').addClass('ev_det_user');
+        //user image
+        var uImg = $('<img>').attr('src', attData.user.pictureUrl);
+        uDiv.append(uImg);
+        //plan image
+        var pImg = $('<img>').attr('src', '/attend_pics/2/YES.gif');
+        uDiv.append(pImg);
+        //result image
+        var rImg = $('<img>').attr('src', '/attend_pics/2/YES.gif');
+        uDiv.append(rImg);
+
+        parent.append(uDiv);
+    }
 }
 
-function buildGroups(attMap, parent) {
-    for (key in attMap) {
+function buildGroups(attMap, empty, parent) {
+    for (var key in attMap) {
         var panel = $('<div>').addClass("panel").addClass("panel-default");
         panel.append($('<div>').addClass("panel-heading").append(key + " (" + countUsersBelow(attMap[key])+ ")"));
         var panelBody = $('<div>').addClass("panel-body");
         buildDom(attMap[key], panelBody);
+        panel.append(panelBody);
+        parent.append(panel);
+    }
+    if (empty !== undefined && empty.length > 0) {
+        var panel = $('<div>').addClass("panel").addClass("panel-default");
+        panel.append($('<div>').addClass("panel-heading").append("? (" + empty.length+ ")"));
+        var panelBody = $('<div>').addClass("panel-body");
+        buildDom(empty, panelBody);
         panel.append(panelBody);
         parent.append(panel);
     }
@@ -182,7 +208,7 @@ function countUsersBelow(node) {
         result += node.data.length;
     }
     if (node.map !== undefined) {
-        for (key in node.map) {
+        for (var key in node.map) {
             result += countUsersBelow(node.map[key]);
         }
     }
