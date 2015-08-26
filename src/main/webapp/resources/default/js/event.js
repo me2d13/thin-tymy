@@ -105,7 +105,7 @@ function getUsedDimensions() {
 function onDimMove(event) {
     var used = getUsedDimensions();
     var attMap = organizeByDimmensions(used, attendanceData.attendance.slice());
-    refreshGui(attMap);
+    refreshGui(attMap, attendanceData.eventType);
     //console.log(attMap);
 }
 
@@ -120,6 +120,7 @@ function groupByFirstDimmension(result, dims) {
     if (dims.length > 0 && result.data !== undefined) {
         var dim = dims.shift();
         result.map = {};
+        result.dimension = dim;
         while (result.data.length > 0) {
             att = result.data.shift();
             var val = getAttDimension(att, dim);
@@ -144,28 +145,28 @@ function groupByFirstDimmension(result, dims) {
     }
 }
 
-function refreshGui(attMap) {
+function refreshGui(attMap, eventTypeData) {
     $("#attendance").fadeOut('fast', function() {
         $("#attendance").empty();
-        console.log("Building from");
-        console.log(attMap);
-        buildDom(attMap, $("#attendance"));
+        //console.log("Building from");
+        //console.log(attMap);
+        buildDom(attMap, eventTypeData, $("#attendance"));
         $("#attendance").fadeIn('fast');
     })
 }
 
-function buildDom(attMap, parent) {
+function buildDom(attMap, eventTypeData, parent) {
     if (attMap.map === undefined && attMap.data !== undefined && attMap.data.length > 0) {
-        buildUsers(attMap.data, parent);
+        buildUsers(attMap.data, eventTypeData, parent);
     } else if (attMap.map !== undefined) {
-        buildGroups(attMap.map, attMap.empty, parent);
+        buildGroups(attMap, eventTypeData, parent);
     } else {
         console.log("Neither data nor attMap:");
         console.log(attMap);
     }
 }
 
-function buildUsers(attDataArray, parent) {
+function buildUsers(attDataArray, eventTypeData, parent) {
     for (var attData of attDataArray) {
         //container
         var uDiv = $('<div>').addClass('ev_det_user');
@@ -173,33 +174,78 @@ function buildUsers(attDataArray, parent) {
         var uImg = $('<img>').attr('src', attData.user.pictureUrl);
         uDiv.append(uImg);
         //plan image
-        var pImg = $('<img>').attr('src', '/attend_pics/2/YES.gif');
+        var pImg = $('<img>').attr('src', getPictureUrl(eventTypeData.preStatusSetId, attData.preStatus));
         uDiv.append(pImg);
         //result image
-        var rImg = $('<img>').attr('src', '/attend_pics/2/YES.gif');
+        var rImg = $('<img>').attr('src', getPictureUrl(eventTypeData.postStatusSetId, attData.postStatus));
         uDiv.append(rImg);
 
         parent.append(uDiv);
     }
 }
 
-function buildGroups(attMap, empty, parent) {
-    for (var key in attMap) {
+function getPictureUrl(setId, code) {
+    if (code === undefined || code == '') {
+        return '/attend_pics/empty.gif';
+    }
+    return '/attend_pics/' +
+        setId + '/' +
+        code + '.gif';
+}
+
+function buildGroups(attMap, eventTypeData, parent) {
+    for (var key in attMap.map) {
         var panel = $('<div>').addClass("panel").addClass("panel-default");
-        panel.append($('<div>').addClass("panel-heading").append(key + " (" + countUsersBelow(attMap[key])+ ")"));
+        panel.append($('<div>').addClass("panel-heading").append(getGroupCaption(key, attMap.dimension, eventTypeData)
+            + " (" + countUsersBelow(attMap.map[key])+ ")"));
         var panelBody = $('<div>').addClass("panel-body");
-        buildDom(attMap[key], panelBody);
+        buildDom(attMap.map[key], eventTypeData, panelBody);
         panel.append(panelBody);
         parent.append(panel);
     }
-    if (empty !== undefined && empty.length > 0) {
+    if (attMap.empty !== undefined && attMap.empty.length > 0) {
         var panel = $('<div>').addClass("panel").addClass("panel-default");
-        panel.append($('<div>').addClass("panel-heading").append("? (" + empty.length+ ")"));
+        panel.append($('<div>').addClass("panel-heading").append(getEmptyGroupCaption(attMap.dimension) +
+            " (" + attMap.empty.length+ ")"));
         var panelBody = $('<div>').addClass("panel-body");
-        buildDom(empty, panelBody);
+        buildUsers(attMap.empty, eventTypeData, panelBody);
         panel.append(panelBody);
         parent.append(panel);
     }
+}
+
+function getGroupCaption(value, dimension, eventTypeData) {
+    switch (dimension) {
+        case "postStatus":
+            for (st of eventTypeData.postStatusSet) {
+                if (st.code == value) {
+                    return st.caption;
+                }
+            }
+            break;
+        case "preStatus":
+            for (st of eventTypeData.preStatusSet) {
+                if (st.code == value) {
+                    return st.caption;
+                }
+            }
+            break;
+        //case "sex":
+        //    return att.user.sex;
+        //case "status": return att.user.status;
+    }
+    return value;
+}
+
+function getEmptyGroupCaption(dimension) {
+    switch (dimension) {
+        case "postStatus": return 'Nevyplněno';
+        case "preStatus": return 'Nezadáno';
+        //case "sex":
+        //    return att.user.sex;
+        //case "status": return att.user.status;
+    }
+    return '?';
 }
 
 function countUsersBelow(node) {
