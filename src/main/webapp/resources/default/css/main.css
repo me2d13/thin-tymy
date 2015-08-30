@@ -49,3 +49,7 @@ header {
     left: 45px;
     top: 28px;
 }
+
+.att_title {
+    border: 1px dotted black;
+}

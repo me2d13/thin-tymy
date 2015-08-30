@@ -1,6 +1,21 @@
-var dimensions = ["postStatus", "preStatus", "sex", "status"];
+var dimensions = ["postStatus", "preStatus", "sex", "status", "preNote"];
+
+var dimCaptions = {};
+dimCaptions[dimensions[0]] = 'Docházka';
+dimCaptions[dimensions[1]] = 'Plán';
+dimCaptions[dimensions[2]] = 'Pohlaví';
+dimCaptions[dimensions[3]] = 'Status';
+dimCaptions[dimensions[4]] = 'Poznámka';
+
+var statusCaptions = {
+    'PLAYER' : 'Hráč',
+    'SICK' : 'Marod',
+    'MEMBER' : 'Člen'
+};
 
 var attendanceData = {};
+
+var emptyKey = '___$$@&^@(&Yasc382ltbiucvocp8yr8374yrclakfu';
 
 $(document).ready(function () {
     data = loadData(eventId);
@@ -78,7 +93,10 @@ function getAttDimension(att, dim) {
             return att.preStatus;
         //case "sex":
         //    return att.user.sex;
-        case "status": return att.user.status;
+        case "status":
+            return att.user.status;
+        case "preNote":
+            return (att.preDescription === undefined || att.preDescription.trim().length == 0) ? undefined : att.preDescription;
     }
 }
 
@@ -87,7 +105,7 @@ function addDimensions(distinctCounts) {
     for (dim of dimensions) {
         if (distinctCounts[dim] > 0) {
             // add ul
-            el.append($('<li>').attr("id", "dim-" + dim).addClass("list-group-item").append(dim));
+            el.append($('<li>').attr("id", "dim-" + dim).addClass("list-group-item").append(dimCaptions[dim]));
             el = $('#available');
         }
     }
@@ -124,19 +142,15 @@ function groupByFirstDimmension(result, dims) {
         while (result.data.length > 0) {
             att = result.data.shift();
             var val = getAttDimension(att, dim);
-            if (val !== undefined) {
-                if (result.map[val] === undefined) {
-                    result.map[val] = {};
-                    result.map[val].data = [];
-                }
-                // move att item to new map
-                result.map[val].data.push(att);
-            } else {
-                if (result.empty === undefined) {
-                    result.empty = [];
-                }
-                result.empty.push(att);
+            if (val === undefined) {
+                val = emptyKey;
             }
+            if (result.map[val] === undefined) {
+                result.map[val] = {};
+                result.map[val].data = [];
+            }
+            // move att item to new map
+            result.map[val].data.push(att);
         }
         // now take next dimension
         for (val in result.map) {
@@ -146,11 +160,12 @@ function groupByFirstDimmension(result, dims) {
 }
 
 function refreshGui(attMap, eventTypeData) {
-    $("#attendance").fadeOut('fast', function() {
+    $("#attendance").fadeOut('fast', function () {
         $("#attendance").empty();
         //console.log("Building from");
         //console.log(attMap);
         buildDom(attMap, eventTypeData, $("#attendance"));
+        $('[data-toggle="tooltip"]').tooltip();
         $("#attendance").fadeIn('fast');
     })
 }
@@ -166,18 +181,33 @@ function buildDom(attMap, eventTypeData, parent) {
     }
 }
 
+function isBlank(val){
+    return (val === undefined || val == null || val.length <= 0) ? true : false;
+}
+
 function buildUsers(attDataArray, eventTypeData, parent) {
     for (var attData of attDataArray) {
         //container
         var uDiv = $('<div>').addClass('ev_det_user');
         //user image
-        var uImg = $('<img>').attr('src', attData.user.pictureUrl);
+        var uImg = $('<img>')
+            .attr('src', attData.user.pictureUrl)
+            .attr('title', attData.user.displayName)
+            .attr('data-toggle', 'tooltip');
         uDiv.append(uImg);
         //plan image
         var pImg = $('<img>').attr('src', getPictureUrl(eventTypeData.preStatusSetId, attData.preStatus));
+        if (!isBlank(attData.preDescription)) {
+            pImg.attr('title', attData.preDescription).attr('data-toggle', 'tooltip');
+            pImg.addClass('att_title');
+        }
         uDiv.append(pImg);
         //result image
         var rImg = $('<img>').attr('src', getPictureUrl(eventTypeData.postStatusSetId, attData.postStatus));
+        if (!isBlank(attData.postDescription)) {
+            pImg.attr('title', attData.postDescription).attr('data-toggle', 'tooltip');
+            pImg.addClass('att_title');
+        }
         uDiv.append(rImg);
 
         parent.append(uDiv);
@@ -197,18 +227,9 @@ function buildGroups(attMap, eventTypeData, parent) {
     for (var key in attMap.map) {
         var panel = $('<div>').addClass("panel").addClass("panel-default");
         panel.append($('<div>').addClass("panel-heading").append(getGroupCaption(key, attMap.dimension, eventTypeData)
-            + " (" + countUsersBelow(attMap.map[key])+ ")"));
+            + " (" + countUsersBelow(attMap.map[key]) + ")"));
         var panelBody = $('<div>').addClass("panel-body");
         buildDom(attMap.map[key], eventTypeData, panelBody);
-        panel.append(panelBody);
-        parent.append(panel);
-    }
-    if (attMap.empty !== undefined && attMap.empty.length > 0) {
-        var panel = $('<div>').addClass("panel").addClass("panel-default");
-        panel.append($('<div>').addClass("panel-heading").append(getEmptyGroupCaption(attMap.dimension) +
-            " (" + attMap.empty.length+ ")"));
-        var panelBody = $('<div>').addClass("panel-body");
-        buildUsers(attMap.empty, eventTypeData, panelBody);
         panel.append(panelBody);
         parent.append(panel);
     }
@@ -217,6 +238,9 @@ function buildGroups(attMap, eventTypeData, parent) {
 function getGroupCaption(value, dimension, eventTypeData) {
     switch (dimension) {
         case "postStatus":
+            if (value == emptyKey) {
+                return 'Nevyplněno';
+            }
             for (st of eventTypeData.postStatusSet) {
                 if (st.code == value) {
                     return st.caption;
@@ -224,28 +248,27 @@ function getGroupCaption(value, dimension, eventTypeData) {
             }
             break;
         case "preStatus":
+            if (value == emptyKey) {
+                return 'Nezadáno';
+            }
             for (st of eventTypeData.preStatusSet) {
                 if (st.code == value) {
                     return st.caption;
                 }
             }
             break;
+        case "preNote":
+            if (value == emptyKey) {
+                return '[prázdná]';
+            }
+            break;
         //case "sex":
         //    return att.user.sex;
-        //case "status": return att.user.status;
+        case "status":
+            return statusCaptions[value];
     }
-    return value;
-}
 
-function getEmptyGroupCaption(dimension) {
-    switch (dimension) {
-        case "postStatus": return 'Nevyplněno';
-        case "preStatus": return 'Nezadáno';
-        //case "sex":
-        //    return att.user.sex;
-        //case "status": return att.user.status;
-    }
-    return '?';
+    return (value == emptyKey) ? '?' : value;
 }
 
 function countUsersBelow(node) {
@@ -257,9 +280,6 @@ function countUsersBelow(node) {
         for (var key in node.map) {
             result += countUsersBelow(node.map[key]);
         }
-    }
-    if (node.empty !== undefined) {
-        result += node.empty.length;
     }
     return result;
 }

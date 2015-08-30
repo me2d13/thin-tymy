@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-sm-2">
         <div class="panel panel-primary">
-            <div class="panel-heading">Used</div>
+            <div class="panel-heading">Seskupeno</div>
             <div class="panel-body">
                 <ul class="list-group sortable-container" id="used">
 
@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="panel panel-default">
-            <div class="panel-heading">Available</div>
+            <div class="panel-heading">Skupiny</div>
             <div class="panel-body">
                 <ul class="list-group sortable-container" id="available">
 
