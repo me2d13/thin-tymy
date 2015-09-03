@@ -227,7 +227,7 @@ function getPictureUrl(setId, code) {
 function buildGroups(attMap, eventTypeData, parent) {
     for (var key in attMap.map) {
         var panel = $('<div>').addClass("panel").addClass("panel-default");
-        panel.append($('<div>').addClass("panel-heading").append(getGroupCaption(key, attMap.dimension, eventTypeData)
+        panel.append($('<div>').addClass("panel-heading").append(dimCaptions[attMap.dimension] + ' : ' + getGroupCaption(key, attMap.dimension, eventTypeData)
             + " (" + countUsersBelow(attMap.map[key]) + ")"));
         var panelBody = $('<div>').addClass("panel-body");
         buildDom(attMap.map[key], eventTypeData, panelBody);
