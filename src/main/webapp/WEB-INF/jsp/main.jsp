@@ -16,8 +16,8 @@
         </div>
     </div>
     <div class="col-md-3 col-md-pull-9">
-        <div id="calendar1" class="hidden-sm"></div>
+        <div id="calendar1" class="hidden-sm hidden-xs"></div>
         <div id="calendar2"></div>
-        <div id="calendar3" class="hidden-sm"></div>
+        <div id="calendar3" class="hidden-sm hidden-xs"></div>
     </div>
 </div>

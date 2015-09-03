@@ -38,13 +38,13 @@ header {
     height: 60px;
 }
 
-.ev_det_user img:nth-child(2) {
+.ev_det_user img:nth-of-type(2) {
     position: absolute;
     left: 45px;
     top: 3px;
 }
 
-.ev_det_user img:nth-child(3) {
+.ev_det_user img:nth-of-type(3) {
     position: absolute;
     left: 45px;
     top: 28px;

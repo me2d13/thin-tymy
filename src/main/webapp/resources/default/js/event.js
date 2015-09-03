@@ -50,6 +50,7 @@ function processData(data) {
     // count distinct values of all dimensions
     attendanceData = data;
     distCount = countDistinct(data, dimensions);
+    refreshDetails(data);
     addDimensions(distCount);
     onDimMove();
 }
@@ -282,4 +283,30 @@ function countUsersBelow(node) {
         }
     }
     return result;
+}
+
+function refreshDetails(data) {
+    $('#ev_type').text(data.eventType.caption);
+    $('#ev_caption').text(data.caption);
+    $('#ev_descr').text(data.description);
+    $('#ev_start_time').text(data.startTime);
+    $('#ev_end_time').text(data.endTime);
+    $('#ev_close_time').text(data.closeTime);
+    $('#ev_place').text(data.place);
+    $('#ev_link').empty();
+    if (data.link) {
+        var lLink = data.link;
+        var lCaption = data.link;
+        if (!lLink.startsWith('http://') &&
+            !lLink.startsWith('https://') &&
+            !lLink.startsWith('ftp://') &&
+            !lLink.startsWith('mailto://')) {
+            lLink = 'http://' + lLink;
+        } else {
+            // strip protocol from caption to look nice
+            lCaption = lLink.replace(/^[a-z]+:\/\/(.*)/, "$1")
+        }
+        var anchor = $('<a>').attr('href', lLink).text(lCaption);
+        $('#ev_link').append(anchor);
+    }
 }
