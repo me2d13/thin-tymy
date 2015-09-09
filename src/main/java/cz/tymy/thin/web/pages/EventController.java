@@ -1,14 +1,12 @@
-package cz.tymy.api.web.pages;
+package cz.tymy.thin.web.pages;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.tymy.api.dto.PostForm;
 import cz.tymy.model.RestResponse;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,9 +23,7 @@ public class EventController extends AbstractController {
 
     @RequestMapping(value = "/event/{evId}", method = RequestMethod.GET)
     public String show(ModelMap model, @PathVariable Integer evId, HttpSession session, HttpServletRequest request) {
-        if (!checkLogin(request, session, model)) {
-            return String.format("redirect:%s", getURL(request, false));
-        }
+        checkLogin(request, session, model);
         addCommonVars(model, request);
         addTxt("event_detail", model, request, session);
         addJavascript(model, "/static/js/event.js");

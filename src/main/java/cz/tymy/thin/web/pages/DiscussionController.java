@@ -1,9 +1,9 @@
-package cz.tymy.api.web.pages;
+package cz.tymy.thin.web.pages;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.tymy.api.dto.PostForm;
+import cz.tymy.thin.dto.PostForm;
 import cz.tymy.model.Post;
 import cz.tymy.model.RestResponse;
 import cz.tymy.model.RestResponseStatus;
@@ -30,9 +30,7 @@ public class DiscussionController extends AbstractController {
 
     @RequestMapping(value = "/ds/{dsId}", method = RequestMethod.GET)
     public String show(@ModelAttribute("post")PostForm postForm, ModelMap model, @PathVariable Integer dsId, HttpSession session, HttpServletRequest request) {
-        if (!checkLogin(request, session, model)) {
-            return String.format("redirect:%s", getURL(request, false));
-        }
+        checkLogin(request, session, model);
         addCommonVars(model, request);
         addTxt("discussion", model, request, session);
         //addJavascript(model, "main.js");
@@ -58,6 +56,7 @@ public class DiscussionController extends AbstractController {
     @RequestMapping(value = "/ds/{dsId}", params = "save", method = RequestMethod.POST)
     public String post(@ModelAttribute("post")PostForm postForm, BindingResult bindingResult, @PathVariable Integer dsId, HttpSession session,
                        HttpServletRequest request, ModelMap model) {
+        checkLogin(request, session, model);
         Post post = new Post();
         post.setPost(postForm.getPost());
         RestResponse result = restTemplate.postForObject(apiUrl(String.format("discussion/%d/post", dsId), request, session), post, RestResponse.class);
@@ -75,6 +74,7 @@ public class DiscussionController extends AbstractController {
     @RequestMapping(value = "/ds/{dsId}", params = "preview", method = RequestMethod.POST)
     public String preview(@ModelAttribute("post")PostForm postForm, @PathVariable Integer dsId, HttpSession session,
                        HttpServletRequest request, ModelMap model) {
+        checkLogin(request, session, model);
         addCommonVars(model, request);
         addTxt("discussion", model, request, session);
         Post post = new Post();

@@ -1,4 +1,4 @@
-package cz.tymy.api.web.pages;
+package cz.tymy.thin.web.pages;
 
 import cz.tymy.model.Discussion;
 import cz.tymy.model.RestResponse;
@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -20,9 +19,7 @@ public class MainController extends AbstractController {
 
     @RequestMapping(value = "/main", method = RequestMethod.GET)
     public String main(ModelMap model, HttpSession session, HttpServletRequest request) {
-        if (!checkLogin(request, session, model)) {
-            return String.format("redirect:%s", getURL(request, false));
-        }
+        checkLogin(request, session, model);
         addCommonVars(model, request);
         addJavascript(model, "/static/js/main.js");
         addJavascript(model, "/cal/bic_calendar.js");

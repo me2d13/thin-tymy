@@ -1,4 +1,4 @@
-package cz.tymy.api.dto;
+package cz.tymy.thin.dto;
 
 /**
  * Created by win7 on 29.7.2015.

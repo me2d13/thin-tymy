@@ -1,22 +1,20 @@
-package cz.tymy.api.web.pages;
+package cz.tymy.thin.web.pages;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import cz.tymy.model.Discussion;
 import cz.tymy.model.RestResponse;
 import cz.tymy.model.RestResponseStatus;
 import cz.tymy.model.User;
+import cz.tymy.thin.error.NotLoggedInException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -73,10 +71,10 @@ public class AbstractController {
         return null;
     }
 
-    protected boolean checkLogin(HttpServletRequest request, HttpSession session, ModelMap model) {
+    protected void checkLogin(HttpServletRequest request, HttpSession session, ModelMap model) {
         String sessionKey = (String) session.getAttribute(ATTR_SESSION_KEY);
         if (StringUtils.isNotBlank(sessionKey)) {
-            return true;
+            return;
         }
         String phpSessionId = request.getParameter(PHP_SESSION_ID);
         if (StringUtils.isBlank(phpSessionId)) {
@@ -92,8 +90,9 @@ public class AbstractController {
             }
         }
         if (StringUtils.isBlank(phpSessionId)) {
-            LOG.warn(PHP_SESSION_ID + " found neither in parameter nor in cookie.");
-            return false;
+            NotLoggedInException e = new NotLoggedInException(PHP_SESSION_ID + " found neither in parameter nor in cookie.");
+            LOG.warn(e.getMessage());
+            throw e;
         }
         String url = apiUrl(String.format("loginPhp/?%s=%s", PHP_SESSION_ID, phpSessionId), request);
         // call rest
@@ -101,7 +100,7 @@ public class AbstractController {
             RestResponse<User> userResponse = restTemplate.getForObject(url, RestResponse.class);
             if (StringUtils.isNotBlank(userResponse.getSessionKey())) {
                 session.setAttribute(ATTR_SESSION_KEY, userResponse.getSessionKey());
-                return true;
+                return;
             } else {
                 LOG.warn(String.format("Can not login user based on php session %s. Status %s, message %s.", phpSessionId,
                         userResponse.getStatus().toString(), concatMessages(userResponse.getMessages())));
@@ -109,7 +108,7 @@ public class AbstractController {
         } else {
             LOG.warn("Cannot build login request URL.");
         }
-        return false;
+        throw new NotLoggedInException("Cannot build login request URL.");
     }
 
     private String concatMessages(Map<String, String> messages) {
@@ -162,7 +161,7 @@ public class AbstractController {
             result = String.format("%s/%s", fixedApiUrl, apiPage);
         } else {
             // get from request
-            result = String.format("%s/api/%s", getURL(request, false), apiPage);
+            result = String.format("%s/thin/%s", getURL(request, false), apiPage);
         }
         LOG.debug(String.format("Querying API [%s]", result));
         return result;
@@ -210,4 +209,8 @@ public class AbstractController {
         return url.toString();
     }
 
+    @ExceptionHandler(NotLoggedInException.class)
+    public String handleNotLoggedIn() {
+        return "redirect:/login";
+    }
 }

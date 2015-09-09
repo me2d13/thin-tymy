@@ -24,7 +24,7 @@ function fetchEvents() {
         lYearEnd++;
     }
     var lFilter = "startTime>1." + lMonth + "." + lYear + "~startTime<1." + lMonthEnd + "." + lYearEnd;
-    var lUrl = "/api/events?filter=" + lFilter;
+    var lUrl = "/thin/events?filter=" + lFilter;
 
     $.ajax({
         url: apiLink(lUrl),
@@ -70,7 +70,7 @@ function loadNewItems() {
     }
     $("#ds-list > a > span").text("?");
     $.ajax({
-        url: apiLink('/api/discussions/newOnly'),
+        url: apiLink('/thin/discussions/newOnly'),
         dataType: "json",
         success: function (data) {
             if (data.status == "OK") {
