@@ -98,10 +98,10 @@ public class AbstractController {
         String url = apiUrl(String.format("loginPhp/?%s=%s", PHP_SESSION_ID, phpSessionId), request);
         // call rest
         if (StringUtils.isNotBlank(url)) {
-            RestResponse<User> userResponse = restTemplate.getForObject(url, RestResponse.class);
+            RestResponse<Map<String, String>> userResponse = restTemplate.getForObject(url, RestResponse.class);
             if (StringUtils.isNotBlank(userResponse.getSessionKey())) {
                 session.setAttribute(ATTR_SESSION_KEY, userResponse.getSessionKey());
-                session.setAttribute(ATTR_USER_LOGIN, userResponse.getData().getLogin());
+                session.setAttribute(ATTR_USER_LOGIN, userResponse.getData().get("login"));
                 return;
             } else {
                 LOG.warn(String.format("Can not login user based on php session %s. Status %s, message %s.", phpSessionId,
