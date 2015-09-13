@@ -127,11 +127,9 @@
 					<webResources>
 						<resource>
 							<directory>src/main/resources</directory>
-							<excludes>
-								<exclude>tapi.dev.properties</exclude>
-							</excludes>
 						</resource>
 					</webResources>
+					<packagingExcludes>**/tapi.dev.properties</packagingExcludes>
 				</configuration>
 			</plugin>
 			<plugin>

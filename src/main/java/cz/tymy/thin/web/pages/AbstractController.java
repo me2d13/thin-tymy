@@ -29,6 +29,7 @@ public class AbstractController {
 
     private static final String ATTR_TEXTS = "txt";
     private static final String ATTR_ERRORS = "errors";
+    protected static final String ATTR_USER_LOGIN = "loginName";
     @Value("${fixedTeamName:}")
     private String fixedTeamName;
 
@@ -39,7 +40,7 @@ public class AbstractController {
     private String fixedApiUrl;
 
     private static final String ATTR_TEAM_SYS_NAME = "teamSysName";
-    private static final String ATTR_SESSION_KEY = "TSID";
+    protected static final String ATTR_SESSION_KEY = "TSID";
     private static final String PHP_SESSION_ID = "PHPSESSID";
     private static final String ATTR_JS_FILES = "jsFiles";
     private static final String ATTR_CSS_FILES = "cssFiles";
@@ -100,6 +101,7 @@ public class AbstractController {
             RestResponse<User> userResponse = restTemplate.getForObject(url, RestResponse.class);
             if (StringUtils.isNotBlank(userResponse.getSessionKey())) {
                 session.setAttribute(ATTR_SESSION_KEY, userResponse.getSessionKey());
+                session.setAttribute(ATTR_USER_LOGIN, userResponse.getData().getLogin());
                 return;
             } else {
                 LOG.warn(String.format("Can not login user based on php session %s. Status %s, message %s.", phpSessionId,
@@ -111,7 +113,7 @@ public class AbstractController {
         throw new NotLoggedInException("Cannot build login request URL.");
     }
 
-    private String concatMessages(Map<String, String> messages) {
+    protected String concatMessages(Map<String, String> messages) {
         if (CollectionUtils.isEmpty(messages)) {
             return "";
         } else {
@@ -161,7 +163,7 @@ public class AbstractController {
             result = String.format("%s/%s", fixedApiUrl, apiPage);
         } else {
             // get from request
-            result = String.format("%s/thin/%s", getURL(request, false), apiPage);
+            result = String.format("%s/api/%s", getURL(request, false), apiPage);
         }
         LOG.debug(String.format("Querying API [%s]", result));
         return result;

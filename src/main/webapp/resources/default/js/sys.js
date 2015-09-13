@@ -9,12 +9,21 @@ function feedbackError(message) {
 var isTouchDevice = ("ontouchstart" in window) || window.DocumentTouch && document instanceof DocumentTouch;
 //var isTouchDevice = true;
 
-function apiLink(serverPath) {
-    return serverPath;
-}
 
 if(!String.prototype.startsWith){
     String.prototype.startsWith = function (str) {
         return !this.indexOf(str);
     }
+}
+
+function apiLink(serverPath) {
+    var result = '/api/'+serverPath;
+    if (tsid !== undefined && tsid != null && tsid.length > 0) {
+        if (result.indexOf('?') > 0) {
+            result += '&TSID=' + tsid;
+        } else {
+            result += '?TSID=' + tsid;
+        }
+    }
+    return result;
 }

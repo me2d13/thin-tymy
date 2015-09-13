@@ -24,7 +24,7 @@ function fetchEvents() {
         lYearEnd++;
     }
     var lFilter = "startTime>1." + lMonth + "." + lYear + "~startTime<1." + lMonthEnd + "." + lYearEnd;
-    var lUrl = "/thin/events?filter=" + lFilter;
+    var lUrl = "events?filter=" + lFilter;
 
     $.ajax({
         url: apiLink(lUrl),
@@ -70,13 +70,16 @@ function loadNewItems() {
     }
     $("#ds-list > a > span").text("?");
     $.ajax({
-        url: apiLink('/thin/discussions/newOnly'),
+        url: apiLink('discussions/newOnly'),
         dataType: "json",
         success: function (data) {
             if (data.status == "OK") {
+                var totalNew = 0;
                 $.each(data.data, function (key, value) {
                     $("#ds-" + value.id).text(value.newPosts);
+                    totalNew += value.newPosts;
                 });
+                document.title = (totalNew == 0) ? sysPageTitle : "" + totalNew + " - " + sysPageTitle;
                 timer = setTimeout(loadNewItems, 120000); // 2 minutes
             } else {
                 feedbackError(data.status);

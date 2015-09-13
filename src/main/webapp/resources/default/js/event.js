@@ -30,7 +30,7 @@ $(document).ready(function () {
 
 function loadData(eventId) {
     $.ajax({
-        url: apiLink('/thin/event/' + eventId),
+        url: apiLink('event/' + eventId),
         dataType: "json",
         success: function (data) {
             if (data.status == "OK") {

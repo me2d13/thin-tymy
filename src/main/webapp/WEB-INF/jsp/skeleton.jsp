@@ -22,6 +22,8 @@
     <script src="<c:url value="/webjars/bootstrap/3.3.5/js/bootstrap.min.js" />"></script>
     <script>
         var contextPath = "${pageContext.request.contextPath}";
+        var tsid = "${sessionScope.TSID}";
+        var sysPageTitle = "${pageTitle}";
     </script>
     <script src="<c:url value="/static/js/sys.js" />"></script>
     <c:if test="${! empty jsFiles}">
@@ -32,8 +34,12 @@
 </head>
 <body class="container">
 <header class="row">
-    <div class="col-xs-6"><a href="http://${teamSysName}.tymy.cz">${teamSysName}.tymy.cz</a> : <a href="<c:url value="/main" />">main</a></div>
-    <div class="col-xs-6 text-right">logout</div>
+    <div class="col-xs-6">
+        <c:choose>
+            <c:when test="${! empty sessionScope.loginName}">${sessionScope.loginName}</c:when>
+            <c:otherwise><a href="http://${teamSysName}.tymy.cz">${teamSysName}.tymy.cz</a></c:otherwise>
+        </c:choose> : <a href="<c:url value="/main" />">main</a></div>
+    <div class="col-xs-6 text-right"><a href="<c:url value="/logout" />">logout</a></div>
 </header>
 <div class="row" id="feedbackRow">
     <div class="col-xs-12 text-center" id="feedback">

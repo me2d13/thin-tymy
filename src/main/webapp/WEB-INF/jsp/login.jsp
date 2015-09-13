@@ -39,6 +39,11 @@
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>${error}
             </div>
         </c:forEach>
+        <c:forEach var="info" items="${infos}">
+            <div class="alert alert-success fade in">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>${info}
+            </div>
+        </c:forEach>
     </div>
 </div>
 <main>
@@ -46,7 +51,8 @@
     <div class="col-xs-1 col-sm-3"></div>
     <div class="col-xs-10 col-sm-6">
         <div class="row">
-            <form:form class="form-horizontal" role="form" method="POST" action="/doLogin" modelAttribute="lf">
+            <c:url var="post_url"  value="/doLogin" />
+            <form:form class="form-horizontal" role="form" method="POST" action="${post_url}" modelAttribute="lf">
                 <div class="form-group">
                     <label class="control-label col-xs-5" for="login">Login:</label>
 

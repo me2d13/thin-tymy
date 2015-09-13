@@ -1,3 +1,4 @@
+<%@ page import="java.util.Enumeration" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
@@ -36,6 +37,18 @@
   <c:forEach var="cookies" items="${cookie}">
     <strong><c:out value= "${cookies.key}"/></strong>: Object=<c:out value="${cookies.value}"/>, value=<c:out value="${cookies.value.value}"/><br/>
   </c:forEach>
+
+  <h2>Here are all the available session vars</h2>
+
+  <%
+  Enumeration En = (Enumeration) (session.getAttributeNames());
+
+  while ( En.hasMoreElements()){
+  out.println("Attribute-->"+En.nextElement());
+  out.println("<br/>");
+  }
+    %>
+
 </main>
 <jsp:useBean id="date" class="java.util.Date" />
 <footer class="row">
