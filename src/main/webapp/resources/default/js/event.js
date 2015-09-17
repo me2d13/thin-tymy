@@ -47,6 +47,10 @@ function loadData(eventId) {
 
 function processData(data) {
     //console.log(data);
+    // filter non-players without pre/post plan
+    data.attendance = data.attendance.filter(function(el) {
+        return (el.postStatus !== undefined || el.preStatus !== undefined || el.user.status == 'PLAYER');
+    });
     // count distinct values of all dimensions
     attendanceData = data;
     distCount = countDistinct(data, dimensions);

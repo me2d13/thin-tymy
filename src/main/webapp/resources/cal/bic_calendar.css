@@ -96,3 +96,7 @@
 .bic_calendar .popover-content{
     font-weight: 300;
 }
+
+.cal_today {
+    border: solid red thin;
+}

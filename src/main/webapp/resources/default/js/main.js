@@ -94,7 +94,14 @@ function loadNewItems() {
 function myDateChangeCallback(pMonth, pYear) {
     month = pMonth + 1; // zero based
     year = pYear;
+    markToday();
     fetchEvents();
+}
+
+function markToday() {
+    var d = new Date();
+    var obj = $('#bic_calendar_'+d.getDate()+'_'+(d.getMonth()+1)+'_'+d.getFullYear());
+    obj.addClass("cal_today");
 }
 
 $(document).ready(function () {
@@ -146,6 +153,7 @@ $(document).ready(function () {
         monthOffset: 1,
         startWeekDay: 0
     });
+    markToday();
     fetchEvents();
 });
 
