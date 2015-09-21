@@ -1,4 +1,4 @@
-var dimensions = ["postStatus", "preStatus", "sex", "status", "preNote"];
+var dimensions = ["postStatus", "preStatus", "gender", "status", "preNote"];
 
 var dimCaptions = {};
 dimCaptions[dimensions[0]] = 'Docházka';
@@ -12,6 +12,8 @@ var statusCaptions = {
     'SICK' : 'Marod',
     'MEMBER' : 'Člen'
 };
+
+var genderCaptions = {'MALE' : 'Muž', 'FEMALE' : 'Žena'};
 
 var attendanceData = {};
 
@@ -96,8 +98,8 @@ function getAttDimension(att, dim) {
             return att.postStatus;
         case "preStatus":
             return att.preStatus;
-        //case "sex":
-        //    return att.user.sex;
+        case "gender":
+            return att.user.gender;
         case "status":
             return att.user.status;
         case "preNote":
@@ -229,7 +231,8 @@ function getPictureUrl(setId, code) {
 }
 
 function buildGroups(attMap, eventTypeData, parent) {
-    for (var key in attMap.map) {
+    var keys = sortKeysOfMap(attMap.map, attMap.dimension);
+    for (var key of keys) {
         var panel = $('<div>').addClass("panel").addClass("panel-default");
         panel.append($('<div>').addClass("panel-heading").append(dimCaptions[attMap.dimension] + ' : ' + getGroupCaption(key, attMap.dimension, eventTypeData)
             + " (" + countUsersBelow(attMap.map[key]) + ")"));
@@ -267,13 +270,43 @@ function getGroupCaption(value, dimension, eventTypeData) {
                 return '[prázdná]';
             }
             break;
-        //case "sex":
-        //    return att.user.sex;
+        case "gender":
+            if (value == emptyKey) {
+                return '[neuvedeno]';
+            }
+            return genderCaptions[value];
         case "status":
             return statusCaptions[value];
     }
 
     return (value == emptyKey) ? '?' : value;
+}
+
+function sortKeysOfMap(map, dimension) {
+    var result = [];
+    var fixedOrder = null;
+    if (dimension == "gender") {
+        fixedOrder = ["MALE", "FEMALE", emptyKey];
+    } else if (dimension == "status") {
+        fixedOrder = ["PLAYER", "SICK", "MEMBER", emptyKey];
+    } else {
+        //TODO: for attendance flag order will come from DB
+        // for now let's use something fixed
+        fixedOrder = ["YES", "NO", "DKY", emptyKey];
+    }
+    if (fixedOrder != null) {
+        for (var key of fixedOrder) {
+            if (map.hasOwnProperty(key)) {
+                result.push(key);
+            }
+        }
+    } else {
+        // unsorted
+        for (var val in map) {
+            result.push(val);
+        }
+    }
+    return result;
 }
 
 function countUsersBelow(node) {
